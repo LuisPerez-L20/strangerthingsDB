@@ -9,7 +9,7 @@ namespace strangerthingsDB.Context
 {
     public class Conexion
     {
-        private string connectionString = "Server=DESKTOP-2CH4M5F;Database=MarvelPersonajes;Integrated Security=True;Encrypt=True;TrustServerCertificate=True;";
+        private string connectionString = "Server=DESKTOP-2CH4M5F;Database=STRANGERTHINGS;Integrated Security=True;Encrypt=True;TrustServerCertificate=True;";
 
         public SqlConnection GetConnection()
         {

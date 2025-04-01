@@ -1,36 +1,32 @@
-using Stringer.Controller;
-using Model.Stranger;
 using System.Net;
 using strangerthingsDB.Controller;
 using System.Drawing.Text;
 using strangerthingsDB.Model;
+using Azure.Identity;
 
 namespace strangerthingsDB
 {
-    public partial class Form1 : Form
+    public partial class FrmInicio : Form
     {
         private IControllerStranger controller = new ControllerStranger();
         private List<ModelStranger> personajes = new List<ModelStranger>();
-        public Form1()
+        public FrmInicio()
         {
             InitializeComponent();
         }
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            CargarPersonajes();
-            CargarComboBox();
-        }
+
 
         private void CargarComboBox()
         {
             try
             {
-                personajes = controller.ObtenerPersonajes(); 
+                personajes = controller.ObtenerPersonajes();
 
-                cmbStranger.DisplayMember = "Nombre";  
-                cmbStranger.ValueMember = "ImagenURL"; 
-                cmbStranger.DataSource = personajes;   
+
+                cmbStranger.DisplayMember = "Nombre";
+                cmbStranger.ValueMember = "ImagenesURL";
+                cmbStranger.DataSource = personajes;
             }
             catch (Exception ex)
             {
@@ -38,7 +34,24 @@ namespace strangerthingsDB
             }
         }
 
-        
+        public void AgregarPersonaje()
+        {
+            try
+            {
+                ModelStranger personaje = new ModelStranger();
+                personaje.Nombre = txbNombre.Text;
+                personaje.Edad = Convert.ToInt32(txbEdad.Text);
+                personaje.Rol = txbRol.Text;
+                personaje.TemporadaAparece = Convert.ToInt32(txbTaparece.Text);
+                personaje.imagenesURL = txbIURL.Text;
+                CargarPersonajes();
+                CargarComboBox();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al agregar el personaje: " + ex.Message);
+            }
+        }
 
 
 
@@ -46,7 +59,7 @@ namespace strangerthingsDB
         {
             try
             {
-              
+
                 if (string.IsNullOrWhiteSpace(url) || !Uri.IsWellFormedUriString(url, UriKind.Absolute))
                 {
                     throw new Exception("URL de imagen no válida.");
@@ -56,7 +69,7 @@ namespace strangerthingsDB
                 {
                     HttpResponseMessage response = await client.GetAsync(url);
 
-                   
+
                     if (!response.IsSuccessStatusCode)
                     {
                         throw new Exception($"Error al obtener la imagen. Código HTTP: {response.StatusCode}");
@@ -64,7 +77,7 @@ namespace strangerthingsDB
 
                     byte[] imageBytes = await response.Content.ReadAsByteArrayAsync();
 
-                   
+
                     using (var ms = new System.IO.MemoryStream(imageBytes))
                     {
                         ImageBox.Image = Image.FromStream(ms);
@@ -88,8 +101,6 @@ namespace strangerthingsDB
             }
         }
 
-
-
         private void CargarPersonajes()
         {
             try
@@ -102,13 +113,19 @@ namespace strangerthingsDB
             }
         }
 
-        private async void cmbSnoopy_SelectedIndexChanged(object sender, EventArgs e)
+        private void Form1_Load_1(object sender, EventArgs e)
         {
-            string? imageUrl = cmbStranger.SelectedValue as string;
+            CargarPersonajes();
+            CargarComboBox();
+        }
 
-            if (!string.IsNullOrEmpty(imageUrl))
+        private async void cmbStranger_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            string? imagenesURL = cmbStranger.SelectedValue as string;
+
+            if (!string.IsNullOrEmpty(imagenesURL))
             {
-                await CargarImagen(imageUrl); 
+                await CargarImagen(imagenesURL);
             }
             else
             {
@@ -116,5 +133,47 @@ namespace strangerthingsDB
             }
         }
 
+        private void button1_Click(object sender, EventArgs e)
+        {
+            CargarPersonajes();
+            CargarComboBox();
+        }
+        private void btnAgregar_Click_1(object sender, EventArgs e)
+        {
+            ModelStranger personaje = new ModelStranger();
+            personaje.IdPersonaje = Convert.ToInt32(txbID.Text);
+            personaje.Nombre = txbNombre.Text;
+            personaje.Edad = Convert.ToInt32(txbEdad.Text);
+            personaje.Rol = txbRol.Text;
+            personaje.TemporadaAparece = Convert.ToInt32(txbTaparece.Text);
+            personaje.imagenesURL = txbIURL.Text;
+            controller.AgregarPersonaje(personaje);
+
+            CargarPersonajes();
+            CargarComboBox();
+        }
+
+        private void btnActualizar_Click(object sender, EventArgs e)
+        {
+            ModelStranger personaje = new ModelStranger();
+            personaje.IdPersonaje = Convert.ToInt32(txbID.Text);
+            personaje.Nombre = txbNombre.Text;
+            personaje.Edad = Convert.ToInt32(txbEdad.Text);
+            personaje.Rol = txbRol.Text;
+            personaje.TemporadaAparece = Convert.ToInt32(txbTaparece.Text);
+            personaje.imagenesURL = txbIURL.Text;
+            controller.ActualizarPersonaje(personaje);
+            CargarPersonajes();
+            CargarComboBox();
+
+        }
+
+        private void btnEliminar_Click(object sender, EventArgs e)
+        {
+          controller.EliminarPersonaje(Convert.ToInt32(txbID.Text));           
+            CargarPersonajes();
+            CargarComboBox();
+
+        }
     }
 }
